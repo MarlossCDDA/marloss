@@ -6,22 +6,26 @@
 
 (defn object->html [x id->objects]
   (cond
-   (map? x) [:table (map
-                          (fn [[k v]] [:tr [:td k] [:td (object->html v id->objects)]])
+   (map? x) [:dl (map
+                          (fn [[k v]] [:dt k [:dd (object->html v id->objects)]])
                           (sort-by first x))]
-   (sequential? x) [:table (map
-                            (fn [o] [:tr [:td (object->html o id->objects)]])
+   (sequential? x) [:ul (map
+                            (fn [o] [:li (object->html o id->objects)])
                             x)]
    (< 1 (count (seq (id->objects x)))) (util/link (str "/objects/disambig/" x ".html") x)
    (id->objects x) (util/link (str "/objects/" (:type (first (id->objects x))) "/" x ".html") x)
    :else (str x)))
 
-(defn object->pointees [id->objects x]
+(defn object->pointees-helper [id->objects x]
   (cond
-   (map? x) (mapcat (partial object->pointees id->objects) (vals x))
-   (sequential? x) (mapcat (partial object->pointees id->objects) x)
+   (map? x) (mapcat (partial object->pointees-helper id->objects) (vals x))
+   (sequential? x) (mapcat (partial object->pointees-helper id->objects) x)
    (id->objects x) [x]
    :else nil))
+
+(defn object->pointees [id->objects x]
+  (filter #(not= % (:id x)) ;; ignore id field pointing at yourself
+           (object->pointees-helper id->objects x)))
 
 (defn backrefs->html [backrefs id->objects]
   (let [objects (sort-by util/object->title (set (mapcat id->objects backrefs)))]
@@ -48,9 +52,9 @@
                                             [:h1 (util/object->title %)]
                                             (object->html % id->objects)
                                             [:h2 "Backrefs"]
-                                            (count id->backrefs)
-                                            (backrefs->html (id->backrefs (:id %)) id->objects))
+                                            (backrefs->html (id->backrefs (:id %)) id->objects)
+                                            [:h2 "Category:" (util/link (str "/indexes/" (:type %) ".html") (:type %))])
                                          1
                                          0)
                                       os))]
-          (println "Checked wisdom for" (count os) t "objects, with" writes "disk writes needed"))))))
+          (println (format "Needed %5s writes for %5s objects on type %s" writes (count os) t)))))))

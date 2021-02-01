@@ -30,7 +30,7 @@
                            [:head
                             [:title title]]
                            [:body
-                            [:h1 (link "/" "Marloss")]
+                            [:h1 (link "/index.html" "Marloss")]
                             [:h4
                              (link "/indexes/armor.html" "Armor") " "
                              (link "/indexes/book.html" "Furniture") " "
@@ -54,6 +54,5 @@
                             [:br]
                             [:p "footer? i hardly know her!"]]])]
     (when-not (= full-body current-contents)
-      (println "Updating" full-path)
       (spit full-path full-body)
       true)))
