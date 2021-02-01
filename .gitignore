@@ -11,5 +11,5 @@ pom.xml.asc
 /.prepl-port
 .hgignore
 .hg/
-/_output/
+/_*output/
 Makefile
