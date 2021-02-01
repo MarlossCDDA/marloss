@@ -19,7 +19,7 @@
 
 (defn link [path text]
   (assert (.startsWith path "/") (str "THAT DOESNT START WITH /" path))
-  [:a {:href (s/lower-case (str "https://marloss.xyz" path))} text])
+  [:a {:href (s/lower-case (str config/marloss-url path))} text])
 
 (defn write-templated
   "Returns true if a write was performed, nil if no write was necessary"

@@ -6,3 +6,5 @@
 (def cdda-json-path (str cdda-data-path "/json"))
 
 (def output-base-path (environ/env :output-base-path "_output"))
+
+(def marloss-url (environ/env :marloss-url "https://marloss.xyz"))
