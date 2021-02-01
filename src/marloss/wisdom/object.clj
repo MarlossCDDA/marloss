@@ -34,7 +34,9 @@
 (defn write-objects [type-id->object]
   (let [id->objects (group-by :id (vals type-id->object))
         id->backrefs (apply merge-with concat
-                            (map (fn [o] {(:id o) (object->pointees id->objects o)})
+                            (map (fn [o]
+                                   (into {} (map (fn [x] [x [(:id o)]])
+                                                 (object->pointees id->objects o))))
                                  (vals type-id->object)))]
     (doseq [[t os] (group-by :type (vals type-id->object))]
       (let [base-path (str config/output-base-path "/objects/" (s/lower-case t) "/")]
