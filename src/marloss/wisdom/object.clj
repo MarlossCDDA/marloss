@@ -42,19 +42,16 @@
                                    (into {} (map (fn [x] [x [(:id o)]])
                                                  (object->pointees id->objects o))))
                                  (vals type-id->object)))]
-    (doseq [[t os] (group-by :type (vals type-id->object))]
-      (let [base-path (str config/output-base-path "/objects/" (s/lower-case t) "/")]
-        (fs/mkdirs base-path)
-        (let [writes (reduce + 0 (map #(if
-                                           (util/write-templated
-                                            (str "/objects/" (:type %) "/" (:id %) ".html")
-                                            (util/object->title %)
-                                            [:h1 (util/object->title %)]
-                                            (object->html % id->objects)
-                                            [:h2 "Backrefs"]
-                                            (backrefs->html (id->backrefs (:id %)) id->objects)
-                                            [:h2 "Category:" (util/link (str "/indexes/" (:type %) ".html") (:type %))])
-                                         1
-                                         0)
-                                      os))]
-          (println (format "Needed %5s writes for %5s objects on type %s" writes (count os) t)))))))
+    (apply concat
+           (for [[t os] (group-by :type (vals type-id->object))]
+             (let [base-path (str config/output-base-path "/objects/" (s/lower-case t) "/")]
+               (fs/mkdirs base-path)
+               (map #(util/write-templated
+                      (str "/objects/" (:type %) "/" (:id %) ".html")
+                      (util/object->title %)
+                      [:h1 (util/object->title %)]
+                      (object->html % id->objects)
+                      [:h2 "Backrefs"]
+                      (backrefs->html (id->backrefs (:id %)) id->objects)
+                      [:h2 "Category:" (util/link (str "/indexes/" (:type %) ".html") (:type %))])
+                    os))))))

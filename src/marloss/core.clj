@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [marloss.config :as config]
             [marloss.data :as data]
+            [marloss.util :as util]
             [marloss.wisdom.disambig :as disambig]
             [marloss.wisdom.index :as index]
             [marloss.wisdom.object :as object]))
@@ -15,6 +16,8 @@
       (when (> (count vs) 1)
         (println (count vs) "ID collision for" k "!!!")))
     (println "Loaded" (count objects) "objects.")
-    (disambig/write-disambig type-id->object)
-    (index/write-indexes type-id->object)
-    (object/write-objects type-id->object)))
+    (let [paths (concat
+                 (disambig/write-disambig type-id->object)
+                 (index/write-indexes type-id->object)
+                 (object/write-objects type-id->object))]
+      (util/write-sitemap paths))))

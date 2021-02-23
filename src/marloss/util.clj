@@ -2,7 +2,8 @@
   (:require [clojure.string :as s]
             [me.raynes.fs :as fs]
             [marloss.config :as config]
-            [hiccup.core :as h]))
+            [hiccup.core :as h]
+            [sitemap.core :as sitemap]))
 
 
 (defn object->name [object]
@@ -22,7 +23,7 @@
   [:a {:href (s/lower-case (str config/marloss-url path))} text])
 
 (defn write-templated
-  "Returns true if a write was performed, nil if no write was necessary"
+  "Returns path"
   [path title & contents]
   (let [full-path (str config/output-base-path (s/lower-case path))
         current-contents (when (fs/exists? full-path) (slurp full-path))
@@ -47,12 +48,21 @@
                              (link "/indexes/species.html" "Species") " "
                              (link "/indexes/tool.html" "Tool") " "
                              (link "/indexes/vehicle.html" "Vehicle") " "
-                             (link "/index.html" "Everything")]
+                             (link "/indexes/index.html" "All Types") " "
+                             (link "/everything.html" "All Objects")]
                             [:div contents]
                             [:br]
                             [:br]
                             [:br]
                             [:p "footer? i hardly know her!"]]])]
     (when-not (= full-body current-contents)
-      (spit full-path full-body)
-      true)))
+      (spit full-path full-body))
+    path))
+
+(defn write-sitemap [paths]
+  (println "writing sitemap for " (count paths) (first paths) (last paths))
+  (spit (str config/output-base-path "/sitemap.xml")
+        (sitemap/generate-sitemap
+         (map
+          (fn [path] {:loc (s/lower-case (str config/marloss-url path))})
+          paths))))

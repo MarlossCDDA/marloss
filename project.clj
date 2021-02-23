@@ -7,7 +7,8 @@
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/data.json "1.0.0"]
                  [hiccup "1.0.5"]
-                 [me.raynes/fs "1.4.6"]]
+                 [me.raynes/fs "1.4.6"]
+                 [sitemap "0.4.0"]]
   :plugins [[lein-environ "1.2.0"]]
   :main ^:skip-aot marloss.core
   :target-path "target/%s"
