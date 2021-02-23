@@ -3,6 +3,7 @@
             [me.raynes.fs :as fs]
             [marloss.config :as config]
             [hiccup.core :as h]
+            [hiccup.util :as util]
             [sitemap.core :as sitemap]))
 
 
@@ -18,9 +19,12 @@
 (defn object->title [object]
   (str (s/capitalize (:type object)) " - " (object->name object)))
 
+(defn path->url [path]
+  (util/escape-html (s/lower-case (str config/marloss-url path))))
+
 (defn link [path text]
   (assert (.startsWith path "/") (str "THAT DOESNT START WITH /" path))
-  [:a {:href (s/lower-case (str config/marloss-url path))} text])
+  [:a {:href (path->url path)} text])
 
 (defn write-templated
   "Returns path"
@@ -60,9 +64,10 @@
     path))
 
 (defn write-sitemap [paths]
-  (println "writing sitemap for " (count paths) (first paths) (last paths))
-  (spit (str config/output-base-path "/sitemap.xml")
-        (sitemap/generate-sitemap
-         (map
-          (fn [path] {:loc (s/lower-case (str config/marloss-url path))})
-          paths))))
+  (println "writing sitemap for " (count paths) "files")
+  (sitemap/generate-sitemap-and-save*
+   config/marloss-url
+   (str config/output-base-path "/sitemap")
+   (map
+    (fn [path] {:loc (path->url path)}) paths)
+   {:gzip? false}))
